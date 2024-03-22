@@ -2207,6 +2207,7 @@ out:
 
 	return success;
 }
+EXPORT_SYMBOL_GPL(wake_up_state);
 
 /**
  * try_to_wake_up_local - try to wake up a local task with rq lock held
