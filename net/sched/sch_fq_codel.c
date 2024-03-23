@@ -198,7 +198,6 @@ static int fq_codel_enqueue(struct sk_buff *skb, struct Qdisc *sch)
 		list_add_tail(&flow->flowchain, &q->new_flows);
 		q->new_flow_count++;
 		flow->deficit = q->quantum;
-		flow->dropped = 0;
 	}
 	if (++sch->q.qlen <= sch->limit)
 		return NET_XMIT_SUCCESS;
@@ -417,9 +416,9 @@ static int fq_codel_init(struct Qdisc *sch, struct nlattr *opt)
 	struct fq_codel_sched_data *q = qdisc_priv(sch);
 	int i;
 
-	sch->limit = 10*1024;
+	sch->limit = 1024;
 	q->flows_cnt = 1024;
-	q->quantum = psched_mtu(qdisc_dev(sch));
+	q->quantum = 300;
 	get_random_bytes(&q->perturbation, sizeof(q->perturbation));
 	INIT_LIST_HEAD(&q->new_flows);
 	INIT_LIST_HEAD(&q->old_flows);
@@ -629,7 +628,7 @@ static const struct Qdisc_class_ops fq_codel_class_ops = {
 	.walk		=	fq_codel_walk,
 };
 
-static struct Qdisc_ops fq_codel_qdisc_ops __read_mostly = {
+struct Qdisc_ops fq_codel_qdisc_ops __read_mostly = {
 	.cl_ops		=	&fq_codel_class_ops,
 	.id		=	"fq_codel",
 	.priv_size	=	sizeof(struct fq_codel_sched_data),
@@ -645,6 +644,7 @@ static struct Qdisc_ops fq_codel_qdisc_ops __read_mostly = {
 	.dump_stats =	fq_codel_dump_stats,
 	.owner		=	THIS_MODULE,
 };
+EXPORT_SYMBOL(fq_codel_qdisc_ops);
 
 static int __init fq_codel_module_init(void)
 {
